@@ -54,8 +54,8 @@ class HeatBedSavetyPlugin(octoprint.plugin.StartupPlugin,
 
 	def get_settings_defaults(self):
 		return dict(
-			pin=19,
-			maxtemp=120
+			pin=26,
+			maxtemp=40
 		)
 
 	@property
@@ -88,9 +88,11 @@ class HeatBedSavetyPlugin(octoprint.plugin.StartupPlugin,
 			self._logger.warning("GPIO already cleaned up")
 
 	def readtemperature(self, comm_instance, parsed_temperatures, *args, **kwargs):
-		current_temp = parsed_temperatures['B'][0]
-		if current_temp >= self.maxtemp:
-			self._bedpower(0)
+		current_temp = parsed_temperatures['T0'][0]
+		if current_temp > self.maxtemp:
+			GPIO.output(self.pin, GPIO.HIGH)
+		if current_temp < self.maxtemp:
+			GPIO.output(self.pin, GPIO.LOW)
 
 		return parsed_temperatures
 
